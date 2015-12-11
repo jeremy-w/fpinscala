@@ -87,6 +87,17 @@ object List { // `List` companion object. Contains functions for creating and wo
 
   def length[A](l: List[A]): Int = foldRight(l, 0)((_, n) => 1 + n)
 
+  /** Used to test stack safety of methods by building a large list.
+   *
+   *  Use like:
+   *
+   *      val bigList = List.repeated(250000, 'a')(Nil)
+   */
+  def repeated[A](n: Int, a: A)(on: List[A]): List[A] = n match {
+    case 0 => on
+    case m => repeated(m-1, a)(Cons(a, on))
+  }
+
   def foldLeft[A,B](l: List[A], z: B)(f: (B, A) => B): B = sys.error("todo")
 
   def map[A,B](l: List[A])(f: A => B): List[B] = sys.error("todo")
