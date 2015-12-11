@@ -1,3 +1,4 @@
+// vi: set ts=2 sw=2 :
 package fpinscala.datastructures
 
 sealed trait List[+A] // `List` data type, parameterized on a type, `A`
@@ -67,7 +68,22 @@ object List { // `List` companion object. Contains functions for creating and wo
     case Cons(h, t) => if (f(h)) dropWhile(t, f) else l
   }
 
-  def init[A](l: List[A]): List[A] = sys.error("todo")
+  def reverse[A](l: List[A]): List[A] = {
+    def go[A](l: List[A], acc: List[A]): List[A] = l match {
+      case Nil => acc
+      case Cons(h, t) => go(t, Cons(h, acc))
+    }
+    go(l, Nil)
+  }
+
+  def init[A](l: List[A]): List[A] = {
+    def go[A](l: List[A], acc: List[A]): List[A] = l match {
+      case Nil => acc
+      case Cons(h, Nil) => acc
+      case Cons(h, t) => go(t, Cons(h, acc))
+    }
+    reverse(go(l, Nil))
+  }
 
   def length[A](l: List[A]): Int = sys.error("todo")
 
