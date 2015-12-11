@@ -1,7 +1,26 @@
 // vi: set ts=2 sw=2 :
 package fpinscala.datastructures
 
-sealed trait List[+A] // `List` data type, parameterized on a type, `A`
+sealed trait List[+A] { // `List` data type, parameterized on a type, `A`
+  override
+  def toString(): String = {
+    // Implementing this in terms of |foldLeft| just hung the REPL for ages
+    // as it tried to do string addition, so switched to |StringBuilder|.
+    //
+    // Needed working printing to use List.repeated in the REPL to play with
+    // crashing foldRight with StackOverflowError vs foldLeft working fine:
+    //
+    //     List.foldRight(bigList, 0)(_ + _)  // BOOM!
+    //     List.foldLeft(bigList, 0)(_ + _)   // No problem!
+    val builder = this match {
+      case Nil => new StringBuilder("List(")
+      case Cons(h, t) =>
+        List.foldLeft(this, new StringBuilder("List(" + h.toString))((s, a) =>
+          s.append(", " + a.toString))
+    }
+    builder.append(")").toString()
+  }
+}
 case object Nil extends List[Nothing] // A `List` data constructor representing the empty list
 /* Another data constructor, representing nonempty lists. Note that `tail` is another `List[A]`,
 which may be `Nil` or another `Cons`.
