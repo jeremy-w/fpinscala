@@ -85,7 +85,13 @@ object List { // `List` companion object. Contains functions for creating and wo
     reverse(go(l, Nil))
   }
 
-  def length[A](l: List[A]): Int = sys.error("todo")
+  def length[A](l: List[A]): Int = {
+    def go[A](l: List[A], acc: Int): Int = l match {
+      case Nil => acc
+      case Cons(_, t) => go(t, 1 + acc)
+    }
+    go(l, 0)
+  }
 
   def foldLeft[A,B](l: List[A], z: B)(f: (B, A) => B): B = sys.error("todo")
 
