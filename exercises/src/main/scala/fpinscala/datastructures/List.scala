@@ -122,5 +122,69 @@ object List { // `List` companion object. Contains functions for creating and wo
     case Cons(h, t) => foldLeft(t, f(z, h))(f)
   }
 
+  def leftSum(l: List[Int]): Int = foldLeft(l, 0)(_ + _)
+  def leftProduct(l: List[Double]): Double = foldLeft(l, 1.0)(_ * _)
+  def leftLength[A](l: List[A]): Int = foldLeft(l, 0)((n, _) => n + 1)
+
+  def foldReverse[A](l: List[A]): List[A] =
+    foldLeft(l, Nil: List[A])((rev, h) => Cons(h, rev))
+
+  /*
+   Right:
+
+   (a (a (a Nil)))
+   (a+(a+(a+  0)))
+
+   Left:
+
+   (a (b (c Nil)))
+   reverse: foldRight(l, Nil)(Cons(_, _))
+   (c (b (a Nil)))
+   then run through foldRight, swapping arg order to function
+   (((0 + a) + b) + c)
+
+   Can we fuse the reversal and f/z bit? I don't think so. Not easily,
+   since we're trying to fuse a composition of a fold with f/z and the reversal
+   args to the inner fold. Messy!
+
+   alternative idea: use foldRight to build up a function calling a function
+   calling… and then kick it all off by passing in z at the end
+
+   So that means returning a function from the foldRight
+   from B to B. And providing a zero function - identity?
+   (Luckily predefined by Scala for us!)
+
+    So we do something like:
+
+    ```
+    (a (b Nil))
+    ==>
+    g(a, g(b, identity))(z)
+    ==>
+    g(a, (bVal0 => identity(bVal0 + b))(z)
+    ==>
+    (bVal1 => (bVal0 => identity(bVal0 + b))(bVal1 + a))(z)
+    ==>
+    (bVal0 => identity(bVal0 + b))(z + a)
+    ==>
+    ((z + a) + b)
+    ```
+
+    where
+
+    ```
+    g[A, B](val: A, func: B => B): B => B =
+      ((bVal: B) => func(f(bVal, val)))
+    ```
+
+    That took some fumbling. Figured out the `f(bVal, val)`, then went,
+    "Uh, wait, what do I do with func? Oh, pass this into it."
+   */
+  def foldLeftViaFoldRight[A,B](l: List[A], z: B)(f: (B, A) => B): B = {
+    foldRight(l, identity _: B => B)(((aVal, func) =>
+      (bVal => func(f(bVal, aVal)))))(z)
+  }
+
+
   def map[A,B](l: List[A])(f: A => B): List[B] = sys.error("todo")
 }
