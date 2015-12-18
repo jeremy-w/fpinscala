@@ -13,12 +13,12 @@ sealed trait List[+A] { // `List` data type, parameterized on a type, `A`
     //     List.foldRight(bigList, 0)(_ + _)  // BOOM!
     //     List.foldLeft(bigList, 0)(_ + _)   // No problem!
     val builder = this match {
-      case Nil => new StringBuilder("List(")
+      case Nil => new StringBuilder("(")
       case Cons(h, t) =>
-        List.foldLeft(this, new StringBuilder("List(" + h.toString))((s, a) =>
-          s.append(", " + a.toString))
+        List.foldLeft(this, new StringBuilder("List("))((s, a) =>
+          s.append(a.toString + ", "))
     }
-    builder.append(")").toString()
+    builder.append("Nil)").toString()
   }
 }
 case object Nil extends List[Nothing] // A `List` data constructor representing the empty list
